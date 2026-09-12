@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vegetable & Fruit Supply Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <h1>Supply Billing Dashboard</h1>
+        <div>
+            <a href="{{ url_for('index') }}">Bills History</a>
+            <a href="{{ url_for('create_bill') }}">Create New Bill</a>
+            <a href="{{ url_for('items') }}">Manage Items/Rates</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>All Bills</h2>
+        <a href="{{ url_for('create_bill') }}" class="btn">+ Generate New Bill</a>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Bill #</th>
+                    <th>Institute Name</th>
+                    <th>Date</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Cheque Info</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in bills %}
+                <tr>
+                    <td>#{{ bill.id }}</td>
+                    <td><strong>{{ bill.institute_name }}</strong></td>
+                    <td>{{ bill.created_at }}</td>
+                    <td>₹{{ "%.2f"|format(bill.total_amount) }}</td>
+                    <td>
+                        <span class="badge badge-{{ bill.status.replace(' ', '-') }}">
+                            {{ bill.status }}
+                        </span>
+                    </td>
+                    <td>{{ bill.cheque_note if bill.cheque_note else 'None' }}</td>
+                    <td>
+                        <a href="{{ url_for('view_bill', bill_id=bill.id) }}" class="btn">View / Edit</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7">No bills generated yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
