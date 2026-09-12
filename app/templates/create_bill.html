@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Bill</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <h1>Supply Billing Dashboard</h1>
+        <div>
+            <a href="{{ url_for('index') }}">Bills History</a>
+            <a href="{{ url_for('create_bill') }}">Create New Bill</a>
+            <a href="{{ url_for('items') }}">Manage Items/Rates</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Generate Bill for Institute</h2>
+        <form action="{{ url_for('create_bill') }}" method="POST">
+            <div class="form-group">
+                <label>Institute / Client Name</label>
+                <input type="text" name="institute_name" required placeholder="e.g., ABC Institute / City Hospital">
+            </div>
+
+            <h3>Select Items and Quantities</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Unit</th>
+                        <th>Rate (₹)</th>
+                        <th>Quantity Delivered</th>
+                        <th>Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.unit }}</td>
+                        <td>₹<span class="rate-val">{{ "%.2f"|format(item.rate) }}</span></td>
+                        <td>
+                            <input type="hidden" name="item_id[]" value="{{ item.id }}">
+                            <input type="number" step="0.01" name="quantity[]" class="qty-input" placeholder="0" min="0" oninput="calculateTotal()">
+                        </td>
+                        <td>₹<span class="item-amount">0.00</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h3 style="text-align: right; margin-top: 20px;">Total Bill Amount: ₹<span id="grand-total">0.00</span></h3>
+
+            <div class="form-group">
+                <label>Payment Status</label>
+                <select name="status" required>
+                    <option value="Pending">Pending</option>
+                    <option value="Partially Received">Partially Received</option>
+                    <option value="Received">Received</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Cheque / Payment Notes</label>
+                <textarea name="cheque_note" rows="3" placeholder="e.g., Cheque #12345 collected from ABC Institute / Pending collection"></textarea>
+            </div>
+
+            <button type="submit" class="btn">Generate & Save Bill</button>
+        </form>
+    </div>
+
+    <script>
+        function calculateTotal() {
+            let qtyInputs = document.querySelectorAll('.qty-input');
+            let rates = document.querySelectorAll('.rate-val');
+            let amounts = document.querySelectorAll('.item-amount');
+            let grandTotal = 0;
+
+            qtyInputs.forEach((input, index) => {
+                let qty = parseFloat(input.value) || 0;
+                let rate = parseFloat(rates[index].innerText) || 0;
+                let itemTotal = qty * rate;
+                
+                amounts[index].innerText = itemTotal.toFixed(2);
+                grandTotal += itemTotal;
+            });
+
+            document.getElementById('grand-total').innerText = grandTotal.toFixed(2);
+        }
+    </script>
+</body>
+</html>
