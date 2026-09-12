@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bill #{{ bill.id }} - {{ bill.institute_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="no-print">
+        <h1>Supply Billing Dashboard</h1>
+        <div>
+            <a href="{{ url_for('index') }}">Bills History</a>
+            <a href="{{ url_for('create_bill') }}">Create New Bill</a>
+            <a href="{{ url_for('items') }}">Manage Items/Rates</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>INVOICE #{{ bill.id }}</h2>
+            <button onclick="window.print()" class="btn no-print">Print Bill</button>
+        </div>
+
+        <p><strong>Institute Name:</strong> {{ bill.institute_name }}</p>
+        <p><strong>Date Generated:</strong> {{ bill.created_at }}</p>
+        <p><strong>Status:</strong> 
+            <span class="badge badge-{{ bill.status.replace(' ', '-') }}">{{ bill.status }}</span>
+        </p>
+        <p><strong>Cheque / Payment Details:</strong> {{ bill.cheque_note if bill.cheque_note else 'None' }}</p>
+
+        <h3>Itemized Summary</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Unit</th>
+                    <th>Rate</th>
+                    <th>Quantity</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.item_name }}</td>
+                    <td>{{ item.unit }}</td>
+                    <td>₹{{ "%.2f"|format(item.rate) }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ "%.2f"|format(item.amount) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3 style="text-align: right; margin-top: 20px;">Total: ₹{{ "%.2f"|format(bill.total_amount) }}</h3>
+
+        <hr class="no-print" style="margin: 30px 0;">
+
+        <!-- Update Status Form -->
+        <div class="no-print">
+            <h3>Update Payment & Cheque Details</h3>
+            <form action="{{ url_for('update_status', bill_id=bill.id) }}" method="POST">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        <option value="Pending" {% if bill.status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Partially Received" {% if bill.status == 'Partially Received' %}selected{% endif %}>Partially Received</option>
+                        <option value="Received" {% if bill.status == 'Received' %}selected{% endif %}>Received</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cheque Note</label>
+                    <textarea name="cheque_note" rows="2">{{ bill.cheque_note }}</textarea>
+                </div>
+                <button type="submit" class="btn">Update Bill Info</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
