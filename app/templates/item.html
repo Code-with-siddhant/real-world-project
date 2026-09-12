@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Items</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <h1>Supply Billing Dashboard</h1>
+        <div>
+            <a href="{{ url_for('index') }}">Bills History</a>
+            <a href="{{ url_for('create_bill') }}">Create New Bill</a>
+            <a href="{{ url_for('items') }}">Manage Items/Rates</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Add / Customize Produce List</h2>
+        <form action="{{ url_for('items') }}" method="POST">
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 2;">
+                    <label>Item Name (e.g., Potato, Apple)</label>
+                    <input type="text" name="name" required placeholder="Item Name">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Unit</label>
+                    <select name="unit" required>
+                        <option value="kg">kg</option>
+                        <option value="crates">crates</option>
+                        <option value="pieces">pieces</option>
+                        <option value="dozen">dozen</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Rate per Unit (₹)</label>
+                    <input type="number" step="0.01" name="rate" required placeholder="0.00">
+                </div>
+            </div>
+            <button type="submit" class="btn">Save Item</button>
+        </form>
+
+        <h3 style="margin-top: 30px;">Item Master List</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Unit</th>
+                    <th>Rate</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.unit }}</td>
+                    <td>₹{{ "%.2f"|format(item.rate) }}</td>
+                    <td>
+                        <a href="{{ url_for('delete_item', item_id=item.id) }}" class="btn btn-danger" onclick="return confirm('Delete this item?')">Delete</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4">No produce items added yet. Add some above!</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
